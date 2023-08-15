@@ -1,0 +1,12 @@
+{
+    "type": "esp32-fota-https",
+    "Date": "15/08/2023",
+    "Time": "15:20",
+    "Uploaded_By": "Krishna Nair",
+    "Note": "Fota Testing for ESP32...",
+    "For": "FOTA_PROJECT_NAME",
+    "version": 2.0,
+    "host": "raw.githubusercontent.com",
+    "port": 80,
+    "bin": "/nairkrishna18/ESP32_FOTA_T2/master/FotaFolder/ModFirmwareFota.bin"
+}
