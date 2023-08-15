@@ -8,5 +8,5 @@
     "version": 2.0,
     "host": "raw.githubusercontent.com",
     "port": 80,
-    "bin": "/nairkrishna18/ESP32_FOTA_T2/master/FotaFolder/ModFirmwareFota.bin"
+    "bin": "/nairkrishna18/AtherEVSE/main/FotaFolder/ModFirmwareFota.bin"
 }
