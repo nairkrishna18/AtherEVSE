@@ -8,7 +8,7 @@ void init_EspDetails(void)
   log_i("Flash Size(Bytes) = %d"  ,ESP.getFlashChipSize());  
   log_i("PSRAM Size(Bytes) = %d"  ,ESP.getPsramSize());
   log_i("Free PSRAM(Bytes) = %d"  ,ESP.getFreePsram());
-  log_i("E Fuse            = %lld",ESP.getEfuseMac());  
+  log_i("E Fuse/ChipId     = %lld",ESP.getEfuseMac());  
   log_i("FlashChipSpeed(Hz)= %d"  ,ESP.getFlashChipSpeed());   
   log_i("Flash Chip Mode   = %d"  ,ESP.getFlashChipMode());   
   log_i("Flash Chip Size   = %d"  ,ESP.getFlashChipSize());
@@ -16,6 +16,7 @@ void init_EspDetails(void)
   log_i("Free Heap (Bytes) = %d"  ,ESP.getFreeHeap());
   log_i("FreeSketch(Bytes) = %d"  ,ESP.getFreeSketchSpace());
   log_i("Sketch Size(Bytes)= %d"  ,ESP.getSketchSize());     
+  
 }
 
 This directory is intended for PlatformIO Test Runner and project tests.
