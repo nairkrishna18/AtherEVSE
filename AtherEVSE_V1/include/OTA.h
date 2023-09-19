@@ -4,11 +4,7 @@
 #include <WiFiClientSecure.h>
 
 
-/************************Trigger Pin or Point************************************/
-#define SW3_PIN                   (39)
-#define FOTA_TRIGGER_DETECTED     (digitalRead(SW3_PIN))
-#define FOTA_TRIGGER_CLEARED      (!digitalRead(SW3_PIN))
-/*********************************************************************************/
+
 
 #define             VERSION_NO                              0
 
@@ -379,5 +375,5 @@ extern UpdateClass Update;
 #endif
 #endif // Update_Edited.h Ends here................
 
-void init_Fota(uint8_t Status);
+void createFotaTask(uint8_t Status);
 void func_FotaTrigger(uint8_t Status);

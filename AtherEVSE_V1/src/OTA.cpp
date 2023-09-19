@@ -27,7 +27,7 @@ char* test_root_ca= "-----BEGIN CERTIFICATE-----\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n"
 "-----END CERTIFICATE-----\n";
 
-const char* ssid     = "SYSKA";     // your network SSID (name of wifi network)
+const char* ssid     = "SYSKA_2G";     // your network SSID (name of wifi network)
 const char* password = "Kichu@2218"; // your network password
 // const char* ssid     = "TROJAN_TP";     // your network SSID (name of wifi network)
 // const char* password = "9833110550"; // your network password
@@ -1876,17 +1876,18 @@ UpdateClass Update;
  * Steps to Add FOTA To Project.....
  * 1. Download and add library/dependencies for fota lib_deps = bblanchon/ArduinoJson@^6.18.5
  * 2. Add C files OTA.cpp and Header files OTA.h to project
- * 3. Call init_Fota( ) function in setup loop
+ * 3. Call createFotaTask( ) function in setup loop
  * 4. Call func_FotaTrigger( ) function in main loop
  * 5. 
 ****************************************************************************************************/
 
 TaskHandle_t TaskOTA;
-void init_Fota(uint8_t Status)
+void createFotaTask(uint8_t Status)
 {
+    
     if(Status == 1)
     {
-        xTaskCreatePinnedToCore(TaskOTAcode,"TaskOTA",10000,NULL,1,&TaskOTA,1); 
+        xTaskCreatePinnedToCore(TaskOTAcode,"TaskOTA",10000,NULL,1,&TaskOTA,0); 
         vTaskSuspend(TaskOTA);        
     }
 }

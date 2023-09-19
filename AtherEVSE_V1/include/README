@@ -37,3 +37,26 @@ Read more about using header files in official GCC documentation:
 * Computed Includes
 
 https://gcc.gnu.org/onlinedocs/cpp/Header-Files.html
+
+
+/*************************************************************/
+How to use Pins as External Interrupt pins
+#define pushButton_pin   15
+#define LED_pin   22
+ 
+void IRAM_ATTR toggleLED()
+{
+  digitalWrite(LED_pin, !digitalRead(LED_pin));
+}
+ 
+void setup()
+{
+  pinMode(LED_pin, OUTPUT);
+  pinMode(pushButton_pin, INPUT);
+  attachInterrupt(pushButton_pin, toggleLED, RISING);
+}
+ 
+void loop()
+{
+}
+/****************************************************************/
