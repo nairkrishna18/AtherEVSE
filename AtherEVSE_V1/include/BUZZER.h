@@ -24,6 +24,7 @@ class BUZZER
     void Buzz(uint8_t sound); // Turn On or Off
     void Beep(uint16_t _ToggleDelayms); // Beep Continuosly with Fixed delay of On-Off
     void Beep(uint16_t _OnDelayms, uint16_t _OffDelayms);// Beep Continuosly with Differenct delay of On-Off
+    void MainBuzzerStates(int8_t BuzStates);
 
     // void Beep(uint8_t sound, uint16_t _delay1ms);
     // void Beep(uint8_t sound1, uint8_t sound2 , uint16_t _delay1ms);
@@ -45,5 +46,16 @@ class BUZZER
     
 
     protected: // Not exposed publically, Can be use with in this class and Inherited class
+
+};
+
+enum
+{
+    BUZSTATE_UKNOWN,
+    BUZSTATE_OFF,
+    BUZSTATE_RFID_DENIED,
+    BUZSTATE_RFID_AUTHORIZED,
+    
+    BUZSTATE_WAIT,
 
 };

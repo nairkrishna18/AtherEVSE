@@ -1,9 +1,11 @@
 #include "NeoPixelAPI.h"
 #include "GlobalHeader.h"
 
+const uint8_t brightness_perc = 100;
 const int interval = 200;
 unsigned long previousMillis = 0;
-static int8_t PixelCounter;
+// static int8_t PixelCounter;
+int8_t PixelCounter;
 static int16_t PixelBrightnessCntr;
 int           pixelQueue = 0;           // Pattern Pixel Queue
 uint8_t gStatusNeoPixel = 0;
@@ -21,7 +23,7 @@ Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 void initNeoPixels(void)
 {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-  pixels.setBrightness(100); // set brightness levels globally.
+  pixels.setBrightness(brightness_perc); // set brightness levels globally.
   log_i("rainbowCycleBlocking() --> start");
   rainbowCycleBlocking(1, DIR_CW, 3);
   log_i("rainbowCycleBlocking() --> end");  
@@ -37,6 +39,7 @@ void mainNeoPixel(uint8_t animation)
   {
     case NP_BLANK:
       colorFill(pixels.Color(0, 0, 0), 100, DIR_CW); // No Colour........
+      PixelCounter = 0;
     break;
    
     case NP_RFID_ERASING_EEPROM:              
@@ -81,7 +84,8 @@ void mainNeoPixel(uint8_t animation)
     break;
 
     case NP_TRY_NEW_ANIMATION:
-      colorRing(pixels.Color(0, 255, 0));
+    
+      // colorRing(pixels.Color(0, 255, 0));
       // colorShiner(pixels.Color(255, 0, 0), 8);
       // colorBeater2Beats(pixels.Color(255, 0, 0), 10);
       // colorBeaterDualShades(pixels.Color(255, 0, 0),pixels.Color(255, 0, 0), 10);
@@ -89,6 +93,41 @@ void mainNeoPixel(uint8_t animation)
           // colorFillDual(pixels.Color(255, 0, 0),pixels.Color(0, 0, 255),125,DIR_VSPLIT_UP);
 
     break;
+
+    
+    case NP_IDLE_STATE:
+      colorBeater(pixels.Color(255, 255, 255),10,10);
+    break;
+    
+    case NP_RFID_DENIED:      
+      colorFillDual(pixels.Color(0, 255, 255),pixels.Color(255, 0, 0),32,DIR_CCW);      
+    break;
+
+    case NP_RFID_AUTHORIZED:      
+      colorFillDual(pixels.Color(0, 255, 255),pixels.Color(0, 255, 0),30,DIR_CW);      
+    break;
+
+    case NP_PREPARING_STATE:            
+      colorFill(pixels.Color(255, 255, 0),290,DIR_CW);   
+    break;
+
+    case NP_PRECHARGE_STATE:            
+      colorFill(pixels.Color(255, 95, 31),320,DIR_VSPLIT_UP);   // Orange
+    break;
+
+    case NP_PROCHARGE_STATE:              
+      colorChaseNum(pixels.Color(0, 255, 0),60,3,DIR_CW); // Green
+    break;
+
+    case NP_FINCHARGE_STATE:              
+      colorFill(pixels.Color(0, 0, 255),290,DIR_VSPLIT_UP);   // Blue
+    break;
+
+    case NP_STPCHARGE_STATE:              
+      colorFill(pixels.Color(255, 0, 255),290,DIR_VSPLIT_UP);   // Magenta
+    break;
+
+
    
 
     /*************Colour Wipe States Ends Here********************/
@@ -285,12 +324,14 @@ void ClearNeoPixels(void)
  * P1 = uint32_t c --> pixels.Color(255, 128, 128) // Select the color to show.
  * P2 = uint16_t wait --> Animation delay in ms
  * P3 = uint8_t direction --> Direction of animation - DIR_CW, DIR_CCW
- * Each pixel will be filled until last piexel 
+ * Each pixel will be filled until last pixel 
  * Erase entire Ring
  * Start the routine again....
 ********************************************************************************/
 void colorFill(uint32_t c, uint16_t wait, uint8_t direction) 
 { 
+    pixels.setBrightness(brightness_perc); // set brightness levels globally.
+    
     if (millis() - previousMillis >= wait) 
     {
       previousMillis = millis();      
@@ -338,12 +379,15 @@ void colorFill(uint32_t c, uint16_t wait, uint8_t direction)
 ********************************************************************************/
 void colorFillDual(uint32_t c1,uint32_t c2, uint16_t wait, uint8_t direction) 
 { 
+
     static uint32_t __shade;
     static uint8_t  __mode;
+    // uint8_t  __mode;
     uint8_t numPixels = pixels.numPixels(); // 16
+    pixels.setBrightness(brightness_perc); // set brightness levels globally.
 
-
-    // log_i("numPixels = %d",numPixels);        
+    // log_i("numPixels = %d",numPixels);    
+    
 
     if(__mode == 0)
     {
@@ -353,6 +397,9 @@ void colorFillDual(uint32_t c1,uint32_t c2, uint16_t wait, uint8_t direction)
     {
       __shade = c2;
     }
+
+        
+
     if (millis() - previousMillis >= wait) 
     {
       previousMillis = millis();      
@@ -390,7 +437,8 @@ void colorFillDual(uint32_t c1,uint32_t c2, uint16_t wait, uint8_t direction)
       else
       if(direction == DIR_CCW) // Counter Clock Wise Direction.....
       {        
-        // pixels.setPixelColor(16-(PixelCounter), __shade);    
+        log_i("__mode = %d & __shade = %d  ",__mode, __shade); 
+
         pixels.setPixelColor(numPixels-(PixelCounter), __shade);    
         log_v("PixelCounterVal = %d",(16-PixelCounter));
       }     

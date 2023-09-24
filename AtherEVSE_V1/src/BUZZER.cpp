@@ -125,5 +125,45 @@ void BUZZER::Beep(uint16_t _OnDelayms, uint16_t _OffDelayms)
     }
 }
 
+void BUZZER::MainBuzzerStates(int8_t BuzStates)
+{
+    static int8_t prvBuzState;
+    static uint16_t __gi6_WaitDelay;
+    switch(BuzStates)
+    {
 
+        case BUZSTATE_OFF:
+            Buzz(BuzOffState); 
+        break;
+
+        case BUZSTATE_RFID_DENIED:
+            Buzz(BuzOnState);
+            // prvBuzState = BuzStates;
+            // BuzStates = BUZSTATE_WAIT;
+            // __gi6_WaitDelay = 1000;
+        break;
+        
+        case BUZSTATE_RFID_AUTHORIZED:
+            Beep(250);
+            // prvBuzState = BuzStates;
+            // BuzStates = BUZSTATE_WAIT;
+            // __gi6_WaitDelay = 1000;            
+        break;
+
+        case BUZSTATE_WAIT:
+            log_i("|---------Start Of Delay = %d---------|",__gi6_WaitDelay );
+            vTaskDelay(pdMS_TO_TICKS(__gi6_WaitDelay)); // 1 sec delay for meter polling.......
+            BuzStates = BUZSTATE_OFF;      
+            log_i("|-------------End Of Delay-------------|");
+              
+        break;
+
+
+        default:
+
+        break;
+    }
+
+
+}
 

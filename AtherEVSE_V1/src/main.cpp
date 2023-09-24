@@ -2,16 +2,16 @@
 #include "Charger.h"
 
 
-#if 1
-  String A_UID1 = "3da0fb"; // for RFID
-  String A_UID2 = "92A3C1"; //"92A3C11C"; // for RFID
-  String A_UID3 = "39D9F7"; //"39D9F7A2"; // for RFID
-#endif
-
-#define OUT_RLY_PIN 21
 
 
 
+
+
+
+/***********************************************************
+ * Function Name: void init_EspDetails(void)
+ * Display Various details of esp32 mcu... 
+***********************************************************/
 void init_EspDetails(void)
 {  
   log_i("SDK Version       = %s"  ,ESP.getSdkVersion());
@@ -29,8 +29,7 @@ void init_EspDetails(void)
   log_i("Heap Size (Bytes) = %d"  ,ESP.getHeapSize());
   log_i("Free Heap (Bytes) = %d"  ,ESP.getFreeHeap());
   log_i("FreeSketch(Bytes) = %d"  ,ESP.getFreeSketchSpace());
-  log_i("Sketch Size(Bytes)= %d"  ,ESP.getSketchSize());     
-  
+  log_i("Sketch Size(Bytes)= %d"  ,ESP.getSketchSize());   
 }
 
 
@@ -41,7 +40,7 @@ void setup()
   Serial.begin(115200);
    
   log_i("|----------------System-Initializing----------------|");
-  log_i("Serial Port Configured @115200");
+  log_i("Serial Port Configured @115200 8-N-1");
   
   // init_EspDetails();
 
@@ -54,7 +53,7 @@ void setup()
   //   delay(200);
   // }  
   
-  pinMode(OUT_RLY_PIN  , OUTPUT);
+  // pinMode(OUT_RLY_PIN  , OUTPUT);
   // digitalWrite(OUT_RLY_PIN, HIGH);    // LOW = OFF, HIGH = ON  
   // delay(3000);
   // digitalWrite(OUT_RLY_PIN, LOW);    // LOW = OFF, HIGH = ON
@@ -75,9 +74,9 @@ void loop()
 {  
 
   #if 0 // to test Out SSD Pin..........
-    digitalWrite(OUT_RLY_PIN, HIGH);    // Turn On Buzzer
+    digitalWrite(OUT_RLY_PIN, HIGH);    // Turn On Output Relay
     delay(3000);
-    digitalWrite(OUT_RLY_PIN, LOW);    // Turn On Buzzer
+    digitalWrite(OUT_RLY_PIN, LOW);    // Turn Off Output Relay
     delay(3000);
   #endif
 

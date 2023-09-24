@@ -10,3 +10,5 @@
 // void funcChargerStateMachine(void);
 void initCreateTask(void);
 
+void funcComState(void);
+void funcMainStateMachine(void);

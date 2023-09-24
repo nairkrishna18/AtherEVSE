@@ -1,25 +1,10 @@
 #include "Charger.h"
 #include <Arduino.h>
 #include "GlobalHeader.h"
-
-#define OUT_RLY_PIN 21
-#define OUT_RELAY_ON    digitalWrite(OUT_RLY_PIN, HIGH)   // LOW = OFF, HIGH = ON  
-#define OUT_RELAY_OFF   digitalWrite(OUT_RLY_PIN, LOW)    // LOW = OFF, HIGH = ON  
+// #include "main.h"
 
 
 uint16_t gNeoPixelState;
-uint16_t gBuzzerState;
-int8_t gi8_MSTATE = MSTATE_UNKNOWN; // Main States of State Machine
-int8_t gi8_NXT_MSTATE; // Previous Main States of State Machine for Wait State....
-uint16_t gi6_WaitDelay;
-int8_t gi8_RFID_SCAN_ENABLE; // RFID Scan enable variable.........
-
-float Energy;
-float Power;
-float Voltage;
-float Current;
-float Frequency;
-
 
 #ifndef _OTA_H_
   #define _OTA_H_
@@ -110,29 +95,13 @@ BUZZER Sound;
       // {
       //     log_i("hregs1[%d] = %d", counter, hregs1[counter]);
       // }
-      
-      #if 1
-        Energy    = ConvertEnergyMeterValues(hregs1[EM_ADD_ENERGY]      ,hregs1[EM_ADD_ENERGY+1]);
-        Power     = ConvertEnergyMeterValues(hregs1[EM_ADD_POWER]       ,hregs1[EM_ADD_POWER+1]);
-        Voltage   = ConvertEnergyMeterValues(hregs1[EM_ADD_VOLTAGE]     ,hregs1[EM_ADD_VOLTAGE+1]);
-        Current   = ConvertEnergyMeterValues(hregs1[EM_ADD_CURRENT]     ,hregs1[EM_ADD_CURRENT+1]);
-        Power     = ConvertEnergyMeterValues(hregs1[EM_ADD_POWER_FACTOR],hregs1[EM_ADD_POWER_FACTOR+1]);
-        Frequency = ConvertEnergyMeterValues(hregs1[EM_ADD_FREQUENCY]   ,hregs1[EM_ADD_FREQUENCY+1]);
 
-        log_d("Energy(kWh)      = %f", Energy);
-        log_d("Power(kW)        = %f", Power);
-        log_d("Voltage(VAC)     = %f", Voltage);
-        log_i("Current(Amp)     = %f", Current);
-        log_d("Power Factor     = %f", Power);
-        log_d("Frequency(Hz)    = %f", Frequency);
-      #else
-        log_i("Energy(kWh)      = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_ENERGY],hregs1[EM_ADD_ENERGY+1]));
-        log_i("Power(kW)        = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_POWER],hregs1[EM_ADD_POWER+1]));
-        log_i("Voltage(VAC)     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_VOLTAGE],hregs1[EM_ADD_VOLTAGE+1]));
-        log_i("Current(Amp)     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_CURRENT],hregs1[EM_ADD_CURRENT+1]));
-        log_i("Power Factor     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_POWER_FACTOR],hregs1[EM_ADD_POWER_FACTOR+1]));
-        log_i("Frequency(Hz)    = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_FREQUENCY],hregs1[EM_ADD_FREQUENCY+1]));
-      #endif
+      log_i("Energy(kWh)      = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_ENERGY],hregs1[EM_ADD_ENERGY+1]));
+      log_i("Power(kW)        = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_POWER],hregs1[EM_ADD_POWER+1]));
+      log_i("Voltage(VAC)     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_VOLTAGE],hregs1[EM_ADD_VOLTAGE+1]));
+      log_i("Current(Amp)     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_CURRENT],hregs1[EM_ADD_CURRENT+1]));
+      log_i("Power Factor     = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_POWER_FACTOR],hregs1[EM_ADD_POWER_FACTOR+1]));
+      log_i("Frequency(Hz)    = %f",ConvertEnergyMeterValues(hregs1[EM_ADD_FREQUENCY],hregs1[EM_ADD_FREQUENCY+1]));
 
 
 
@@ -176,16 +145,13 @@ BUZZER Sound;
       initModbus();
       while(1)
       {
-        #if 0
         ProfilerModbus++;
         if(ProfilerModbus > 1)
         {
           ProfilerModbus = 0;
           log_i("TaskModBus  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_MODBUS_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));
           log_v("MODBUS____TASK____RUNNING______________!");
-        }    
-        #endif
-
+        }      
         func_ReadHoldingRegister();
       }
   }
@@ -249,12 +215,12 @@ void TaskRfid( void * pvParameters )
      
     while(1)
     {
-      #if 0  // Profiler Counter...........
+      #if 1 // Profiler Counter...........
         ProfilerRfid++;
         if(ProfilerRfid > 100)
         {
           ProfilerRfid = 0;
-          log_d("TaskRfid  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_RFID_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));
+          log_i("TaskRfid  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_RFID_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));
           log_v("RFID____TASK____RUNNING______________!");
         }    
       #endif     
@@ -293,17 +259,9 @@ void TaskNeoPixel( void * pvParameters )
 /*********************BUZZER TASK & FUNCTIONS STARTS HERE*************/
 void initBuzzer(void)
 {
-  Sound.begin(DPIN_BUZZER);  
-
-  log_i("|----------------Buzzer Initialized--------------|");
-  #if 1 // Disable if it is distracting........
-    Sound.Buzz(Sound.BuzOnState);
-    vTaskDelay(pdMS_TO_TICKS(150)); // 1 sec delay for Buzzer Beep To indicate it is initialized....
-  #endif
+  Sound.begin(DPIN_BUZZER);
   Sound.Buzz(Sound.BuzOffState);
-
 } 
-
 #define STACKSIZE_BUZZER_TASK 5000 // BYTES
 TaskProfilers ProfilerBuzzer;
 TaskHandle_t HandleBuzzer;
@@ -321,8 +279,7 @@ void TaskBuzzer( void * pvParameters )
         log_v("BUZZER____TASK____RUNNING______________!");
       }
       #endif
-      // Sound.Beep(100,3000);
-      Sound.MainBuzzerStates(gBuzzerState);
+      // Sound.Beep(500,3000);
       
     }
 }
@@ -331,54 +288,29 @@ void TaskBuzzer( void * pvParameters )
 /*********************MAIN STATE TASK & FUNCTIONS STARTS HERE*************/
 void initMainState(void)
 {
-  pinMode(OUT_RLY_PIN  , OUTPUT);
-  #if 0
-    OUT_RELAY_ON;
-    delay(3000);
-  #endif
-  OUT_RELAY_OFF; 
+  
   
 } 
 
-
-/***********************************************************************************
- * Function Name : void TaskMainState( void * pvParameters )
- * Argument : Various parameters 
-***********************************************************************************/
 #define STACKSIZE_MAINSTATE_TASK 5000 // BYTES
 TaskProfilers ProfilerMainState;
 TaskHandle_t HandleMainState;
 void TaskMainState( void * pvParameters )
 {
     initMainState(); 
-
     while(1)
     {
       #if 0 // it prints a lot of messages..................... better to disable this here......
-      ProfilerMainState++;      
-      if(ProfilerMainState > 600)
+      ProfilerMainState++;
+      if(ProfilerMainState > 60000)
       {
         ProfilerMainState = 0;
-        log_d("TaskMainState  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_MAINSTATE_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));  
+        log_i("TaskMainState  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_MAINSTATE_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));  
         log_v("MAIN_STATE____TASK____RUNNING______________!");
-        
-        log_i("\n|---------------Variables------------------|");         
-        log_i("gi8_RFID_STATUS   = %d", gi8_RFID_STATUS); 
-        log_i("gi8_MSTATE        = %d", gi8_MSTATE);
-        log_i("gi8_NXT_MSTATE    = %d", gi8_NXT_MSTATE);
-        log_i("gBuzzerState      = %d", gBuzzerState); 
-        log_i("gMasterCardStatus = %d", gMasterCardStatus); 
-        log_i("gNeoPixelState    = %d", gNeoPixelState); 
-        log_i("gStatusNeoPixel   = %d", gStatusNeoPixel); 
       }
-      #endif    
+      #endif
 
-      funcComState();
-      funcMainStateMachine();
-
-      delay(10);
-
-
+      delay(200);
     }
 }
 /*********************MAIN STATE TASK & FUNCTIONS ENDS HERE***************/
@@ -391,11 +323,11 @@ void initCreateTask(void)
   pinMode(FOTA_SWITCH , INPUT_PULLUP); 
   createFotaTask(1); // Created @core 0
 
-  /**********************************************************************
+  /***********
    * Check for the FOTA Switch
    * If Fota switch is pressed and confirmed continue with FOTA Task
    * Else Continue with Other Tasks...........
-  ***********************************************************************/
+  */
   if(!digitalRead(FOTA_SWITCH))
   {
     log_i("Fota Pin Pressed....");
@@ -426,17 +358,9 @@ void initCreateTask(void)
                     &HandleRfid,        /* Task handle to keep track of created task, always pass address of handle*/
                     0);                   /* pin task to core 0 */
 
-    xTaskCreatePinnedToCore(
-                    TaskMainState,           /* Task function. */
-                    "MainStateTask",         /* name of task. */
-                    STACKSIZE_MAINSTATE_TASK,/* Stack size of task in bytes*/
-                    NULL,                   /* parameter of the task */
-                    3,                      /* 3priority of the task */
-                    &HandleMainState,        /* Task handle to keep track of created task, always pass address of handle*/
-                    0);                     /* pin task to core 0 */
   }  
                     
-  //////////////////Below Tasks are Non Blocking Tasks Also Used in FOTA............................                    
+  //////////////////Below Tasks are Non Bloacking Tasks Also Used in FOTA............................                    
   xTaskCreatePinnedToCore(
                     TaskNeoPixel,           /* Task function. */
                     "NeopixelTask",         /* name of task. */
@@ -455,240 +379,17 @@ void initCreateTask(void)
                     &HandleBuzzer,        /* Task handle to keep track of created task, always pass address of handle*/
                     1);                     /* pin task to core 0 */
 
-  
+  xTaskCreatePinnedToCore(
+                    TaskMainState,           /* Task function. */
+                    "MainStateTask",         /* name of task. */
+                    STACKSIZE_MAINSTATE_TASK,/* Stack size of task in bytes*/
+                    NULL,                   /* parameter of the task */
+                    3,                      /* 3priority of the task */
+                    &HandleMainState,        /* Task handle to keep track of created task, always pass address of handle*/
+                    0);                     /* pin task to core 0 */
 
 }
-/************************EO void initCreateTask(void)************************/
-
-void funcComState(void)
-{
-
-}
-
-void funcMainStateMachine(void)
-{
-
-  static int8_t __varChargeStates;
-
-  switch(gi8_MSTATE)
-  {
-    case MSTATE_ERROR:
-
-    break;
-
-    case MSTATE_UNKNOWN:
-    if(gi8_RFID_STATUS == RFID_READER_PRESENT)
-    {
-      gi8_MSTATE = MSTATE_INIT;
-    }
-
-    break;
-
-    case MSTATE_INIT:
-    gi8_MSTATE = MSTATE_IDLE;
-    OUT_RELAY_OFF;
-    gi8_RFID_SCAN_ENABLE = 1;
-    __varChargeStates = __initState; // Init State.......
-
-    break;
-
-    case MSTATE_IDLE:
-
-      if(gi8_RFID_STATUS == RFID_NEW_CARD_DENIED)
-      {
-        gNeoPixelState  = NP_RFID_DENIED;
-        gBuzzerState    = BUZSTATE_RFID_DENIED;
-
-        gi8_NXT_MSTATE  = gi8_MSTATE;
-        gi8_MSTATE      = MSTATE_WAIT;       
-        gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-        gi6_WaitDelay   = 1000;
-      }
-      else
-      if(gi8_RFID_STATUS == RFID_NEW_CARD_AUTHORIZED)
-      {
-        gNeoPixelState  = NP_RFID_AUTHORIZED;
-        gBuzzerState    = BUZSTATE_RFID_AUTHORIZED;
-
-        __varChargeStates = __rfidAuthIdle; // RFID Card Authorized in Idle State
-
-        gi8_NXT_MSTATE  = MSTATE_PREPARING;
-        gi8_MSTATE      = MSTATE_WAIT;       
-        gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-        gi6_WaitDelay   = 1100;
-        
-      }
-      else
-      {
-        gNeoPixelState = NP_IDLE_STATE;
-      }
-
-    break;
-
-    case MSTATE_PREPARING: // Wait for Gun to Connect
-
-      gNeoPixelState  = NP_PREPARING_STATE;     
-      gi8_RFID_SCAN_ENABLE = 0;
-
-      __varChargeStates = __PrepState; // In Preparing State 
-
-      gi8_NXT_MSTATE  = MSTATE_PRE_CHARGING;
-      gi8_MSTATE      = MSTATE_WAIT;       
-      gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-      gi6_WaitDelay   = 5000; // Gun Detection and Detection Time is considered as 5 Seconds....
-
-    break;
-
-    case MSTATE_PRE_CHARGING: // Turn on Output Contactor & Wait for CURRENT TO SENSE.....
-
-      if(__varChargeStates == __PrepState)
-      {
-        gNeoPixelState  = NP_PRECHARGE_STATE;   
-        __varChargeStates = __outRelayOn; // Output relay On   
-
-        gi8_NXT_MSTATE  = MSTATE_PRE_CHARGING;
-        gi8_MSTATE      = MSTATE_WAIT;       
-        gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-        gi6_WaitDelay   = 5000; // Minimum Current detection 
-
-        OUT_RELAY_ON;
-
-
-        
-      }
-      else
-      if(__varChargeStates == __outRelayOn)
-      {
-        
-        if(Current != 0 )
-        {
-          __varChargeStates = __senChargCurr; // Sensed Charging Current
-          gi8_NXT_MSTATE  = MSTATE_PRO_CHARGING;
-          gi8_MSTATE      = MSTATE_WAIT;       
-          gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-          gi6_WaitDelay   = 10; // Minimum Current detection 
-
-          PixelCounter = 0;
-          
-
-        }            
-        else // Load is not connected.....
-        {
-          OUT_RELAY_OFF;
-          gi8_MSTATE      = MSTATE_INIT; 
-          __varChargeStates = __noChargCurr; // Not sensed Charging Current
-        }         
-      }      
-
-    break;
-
-    case MSTATE_PRO_CHARGING:       
-      
-      gi8_RFID_SCAN_ENABLE = 1;
-      
-      if(Current == 0)
-      {
-        log_i("Current(0) = %d", Current);
-        if((__varChargeStates == __senChargCurr))
-        {
-          __varChargeStates = __evFinCharging; // EV Finished Charging/ Stopped Charging/ Rejected Charging..........
-          gNeoPixelState  = NP_PRECHARGE_STATE;  
-          gi8_NXT_MSTATE  = MSTATE_PRO_CHARGING;
-          gi8_MSTATE      = MSTATE_WAIT;               
-          gi6_WaitDelay   = 5000; // Minimum Current detection 
-        }
-        else
-        if((__varChargeStates == __evFinCharging)) // Still Current == 0
-        {
-          OUT_RELAY_OFF;
-          __varChargeStates = __outRelayOff;  // Turned Off Output relay............          
-          gi8_NXT_MSTATE  = MSTATE_FIN_CHARGING;
-          gi8_MSTATE      = MSTATE_WAIT;               
-          gi6_WaitDelay   = 10; // Minimum Current detection 
-        }
-      }
-      else
-      if(Current > 0)
-      {
-
-        gNeoPixelState  = NP_PROCHARGE_STATE; 
-
-        if(gi8_RFID_STATUS == RFID_NEW_CARD_DENIED)
-        {
-          gNeoPixelState  = NP_RFID_DENIED;
-          gBuzzerState    = BUZSTATE_RFID_DENIED;
-
-          gi8_NXT_MSTATE  = MSTATE_PRO_CHARGING;
-          gi8_MSTATE      = MSTATE_WAIT;       
-          gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-          gi6_WaitDelay   = 1000;
-        }
-        else
-        if(gi8_RFID_STATUS == RFID_NEW_CARD_AUTHORIZED)
-        {
-          __varChargeStates = __rfidAuthProg;   // Rfid card Authorized in Progress Charging State     
-
-          PixelCounter = 0;       
-          gNeoPixelState  = NP_RFID_AUTHORIZED;             
-
-          gBuzzerState    = BUZSTATE_RFID_AUTHORIZED;          
-
-          gi8_NXT_MSTATE  = MSTATE_STP_CHARGING;
-          gi8_MSTATE      = MSTATE_WAIT;       
-          gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
-          gi6_WaitDelay   = 1100;
-          OUT_RELAY_OFF;          
-          
-
-        }
-
-      }
-      
-      
-    break;
-
-    case MSTATE_STP_CHARGING: // Charging Stopped By user By means of RFID
-    gNeoPixelState  = NP_STPCHARGE_STATE;
-    gi8_RFID_SCAN_ENABLE = 0;
-    if(__varChargeStates == __rfidAuthProg)
-    {
-      __varChargeStates = __userStopCharging; // User Stopped Charging
-      gi8_NXT_MSTATE  = MSTATE_INIT;
-      gi8_MSTATE      = MSTATE_WAIT;               
-      gi6_WaitDelay   = 5000; 
-    }
-    break;
-
-    case MSTATE_FIN_CHARGING: // Charging stopped by EV Charging Current = 0
-    gNeoPixelState  = NP_FINCHARGE_STATE;
-    if(__varChargeStates == __outRelayOff)
-    {
-      __varChargeStates = __evFinChargingFinal; // Ev Stopped Charging..........
-      gi8_NXT_MSTATE  = MSTATE_INIT;
-      gi8_MSTATE      = MSTATE_WAIT;               
-      gi6_WaitDelay   = 5000; 
-    }
-
-    break;
-
-    case MSTATE_WAIT:
-      log_i("|---------Start Of Delay = %d---------|",gi6_WaitDelay );
-      vTaskDelay(pdMS_TO_TICKS(gi6_WaitDelay)); // 1 sec delay for meter polling.......
-      gi8_MSTATE = gi8_NXT_MSTATE;      
-      log_i("|-------------End Of Delay-------------|");
-      gNeoPixelState  = NP_BLANK;
-      gBuzzerState    = BUZSTATE_OFF;
-    break;
-
-    default:
-      gi8_MSTATE = MSTATE_UNKNOWN;
-    break;
-
-  }
-
-
-}
-
+/*********************BUZZER TASK & FUNCTIONS ENDS HERE***************/
 
 
 /*********************EOF*********************************************/

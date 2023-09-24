@@ -27,7 +27,7 @@ char* test_root_ca= "-----BEGIN CERTIFICATE-----\n"
 "CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=\n"
 "-----END CERTIFICATE-----\n";
 
-const char* ssid     = "SYSKA_2G";     // your network SSID (name of wifi network)
+const char* ssid     = "SYSKA 2G";     // your network SSID (name of wifi network)
 const char* password = "Kichu@2218"; // your network password
 // const char* ssid     = "TROJAN_TP";     // your network SSID (name of wifi network)
 // const char* password = "9833110550"; // your network password

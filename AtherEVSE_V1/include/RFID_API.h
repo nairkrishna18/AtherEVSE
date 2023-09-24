@@ -10,5 +10,5 @@ uint8_t initRFID(void);
 
 
 
-void funcRFIDAuthorize(void);
+void funcRFIDAuthorize(uint8_t __enable);
 

@@ -7,8 +7,23 @@ extern uint8_t gStatusNeoPixel;
 extern int8_t gMasterCardStatus;
 
 extern int8_t gi8_RFID_STATUS;
+extern uint16_t gBuzzerState;
+extern int8_t gi8_MSTATE; // Main States of State Machine
+extern int8_t gi8_NXT_MSTATE; // Previous Main States of State Machine for Wait State....
 
-enum  // NeoPixel States................
+extern int8_t gi8_RFID_SCAN_ENABLE; // RFID Scan enable variable.........
+
+extern int8_t PixelCounter;
+
+extern float Energy;
+extern float Power;
+extern float Voltage;
+extern float Current;
+extern float Frequency;
+
+
+
+enum  // gNeoPixelState = NeoPixel States................
 { 
     NP_BLANK, 
 
@@ -47,12 +62,25 @@ enum  // NeoPixel States................
     NP_RFID_WAIT_FOR_MASTER_CARD,
 
     NP_TRY_NEW_ANIMATION,
+
+    NP_IDLE_STATE,
+    NP_RFID_DENIED,
+    NP_RFID_AUTHORIZED,
+    NP_PREPARING_STATE,
+    NP_PRECHARGE_STATE,
+    NP_PROCHARGE_STATE,
+    NP_FINCHARGE_STATE,
+    NP_STPCHARGE_STATE,
+
+
+
+
     
     NP_RESET_PIXELS, // to clear all pixels and reset..
     
 }; // anonymous enum (no name tag)
 
-enum // NeoPixel Animations
+enum // Type of NeoPixel Animations..........
 {    
     DIR_CW,
     DIR_CCW,
@@ -61,7 +89,7 @@ enum // NeoPixel Animations
 
 }; // anonymous enum (no name tag)
 
-enum // Various RFID States
+enum // gi8_RFID_STATUS = Various RFID States
 {
     RFID_READER_ERROR = -10,
 
@@ -75,3 +103,38 @@ enum // Various RFID States
     RFID_NEW_CARD_AUTHORIZED,    
 
 };
+
+enum // gi8_MSTATE =  Various Main States related to charger.....
+{
+    MSTATE_ERROR = -1,  // Error Condition..
+
+    MSTATE_UNKNOWN = 0, // We dont know the state
+    MSTATE_INIT,        // Initialization state, Mostly execute only once and move on
+    MSTATE_IDLE,        // Charging waiting for any command for charging
+    MSTATE_PREPARING,   // Charging command received Prepare for charging
+    MSTATE_PRE_CHARGING,// Pre Charging , Waiting to connect Gun
+    MSTATE_PRO_CHARGING,// Gun Connected and Charging current detected...
+    MSTATE_STP_CHARGING,// Charging stopped by user using RFID card
+    MSTATE_FIN_CHARGING,// Charging Finished by Ev SOC = 100%
+    MSTATE_WAIT,        // Wait State.....
+    
+};
+
+enum // __varChargeStates
+{
+    __noChargCurr = -1,
+    __initState = 0,
+    __rfidAuthIdle,
+    __PrepState,
+    __outRelayOn,
+    __senChargCurr,
+    __evFinCharging,
+    __outRelayOff,
+    __rfidAuthProg,
+    __userStopCharging,
+    __evFinChargingFinal,
+    
+
+
+};
+

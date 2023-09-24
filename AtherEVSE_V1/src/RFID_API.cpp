@@ -18,7 +18,7 @@ bool programMode = false;  // initialize programming mode to false
 
 uint8_t successRead;    // Variable integer to keep if we have Successful Read from Reader
 int8_t gMasterCardStatus = 0;    // Variable integer to keep if we have Successful Read from Reader
-int8_t gi8_RFID_STATUS = 0;
+int8_t gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
 
 
 byte storedCard[4];   // Stores an ID read from EEPROM
@@ -31,10 +31,6 @@ uint8_t ShowReaderDetails(void) ;
 void init_Rfid_WipeCode(void);
 void initCheckUpdateMasterCardStatus(void);
 
-//String A_UID1 = "f9e4c814";
-// String A_UID1 = "3da0fb"; // for RFID
-// String A_UID2 = "92A3C1"; //"92A3C11C"; // for RFID
-// String A_UID3 = "39D9F7"; //"39D9F7A2"; // for RFID
 
 
 uint8_t initRFID(void)
@@ -64,7 +60,8 @@ uint8_t initRFID(void)
       log_i("RFID Reader Status = %d", retStatus);      
       if(!retStatus)
       {
-        gi8_RFID_STATUS = -1;
+        gi8_RFID_STATUS = RFID_READER_ERROR;
+        log_e("gi8_RFID_STATUS = RFID_READER_ERROR(%d)", gi8_RFID_STATUS);
       }
       
     #else
@@ -74,10 +71,10 @@ uint8_t initRFID(void)
 
     if(retStatus) // if Reader is Ok then call below functions
     {
-      init_Rfid_WipeCode();
-      initCheckUpdateMasterCardStatus();
+      gi8_RFID_STATUS = RFID_READER_PRESENT;
+      log_i("gi8_RFID_STATUS = RFID_READER_PRESENT(%d)", gi8_RFID_STATUS);
+      initCheckUpdateMasterCardStatus();      
     }
-
   return retStatus;
 }
 
@@ -282,7 +279,7 @@ void initCheckUpdateMasterCardStatus(void)
   log_i("Waiting PICCs to be scanned");
   
   // gNeoPixelState = NP_ACW_WHITE_DIRCW;
-  gNeoPixelState = NP_TRY_NEW_ANIMATION;
+  // gNeoPixelState = NP_TRY_NEW_ANIMATION;
 
 
 }
@@ -299,7 +296,7 @@ void funcCheckUpdateMasterCardStatus(void)
     }
 
     if(successRead == 1) // Master Card Scanned 
-    {
+    {     
       WipeButtonStatus = 0; // it can be wiped again.........
       log_i("WipeButtonStatus(successRead == 1) = %d",WipeButtonStatus);
     }
@@ -618,11 +615,14 @@ void funcRFID_ProgramAndNormalMode(uint8_t __successRead)
         }
       }
     }
-    else 
+    else //Normal Mode.........
     {
       if ( isMaster(readCard)) 
       {    // If scanned card's ID matches Master Card's ID - enter program mode
         programMode = true;
+        gi8_RFID_STATUS = RFID_MASTER_CARD_DETECTED;   
+        log_i("gi8_RFID_STATUS = RFID_MASTER_CARD_DETECTED(%d)", gi8_RFID_STATUS);     
+
         log_i("Hello Master - Entered Program Mode");
         uint8_t count = EEPROM.read(0);   // Read the first Byte of EEPROM that
         log_i("I have (%d) record(s) on EEPROM", count);     // stores the number of ID's in EEPROM
@@ -634,13 +634,17 @@ void funcRFID_ProgramAndNormalMode(uint8_t __successRead)
       {
         if ( findID(readCard) ) 
         { // If not, see if the card is in the EEPROM
+          gi8_RFID_STATUS = RFID_NEW_CARD_AUTHORIZED;   
+          log_i("gi8_RFID_STATUS = RFID_NEW_CARD_AUTHORIZED(%d)", gi8_RFID_STATUS);   
           log_i("Welcome, You shall pass");
-          granted(300);         // Open the door lock for 300 ms
+          // granted(300);         // Open the door lock for 300 ms
         }
         else 
         {      // If not, show that the ID was not valid
           log_i("You shall not pass");
-          denied();
+          gi8_RFID_STATUS = RFID_NEW_CARD_DENIED;   
+          log_i("gi8_RFID_STATUS = RFID_NEW_CARD_DENIED(%d)", gi8_RFID_STATUS);  
+          // denied();
         }
       }
     }
@@ -648,8 +652,12 @@ void funcRFID_ProgramAndNormalMode(uint8_t __successRead)
 
 }
 
-void funcRFIDAuthorize(void)
+void funcRFIDAuthorize(uint8_t __enable)
 {
-  funcCheckUpdateMasterCardStatus();
-  funcRFID_ProgramAndNormalMode(successRead);
+  if(__enable)
+  {
+    funcCheckUpdateMasterCardStatus();
+    funcRFID_ProgramAndNormalMode(successRead);
+  }
+  
 }
