@@ -3,11 +3,6 @@
 
 
 
-
-
-
-
-
 /***********************************************************
  * Function Name: void init_EspDetails(void)
  * Display Various details of esp32 mcu... 
@@ -34,17 +29,23 @@ void init_EspDetails(void)
 
 
 
-
 void setup()
 {
   Serial.begin(115200);
-   
+
+  
   log_i("|----------------System-Initializing----------------|");
   log_i("Serial Port Configured @115200 8-N-1");
+  log_i(__DATE__);// Give Project File location
+  log_i(__TIME__);// Give Project File location
+  log_i(__FILE__);// Give Project File location 
+  log_i("Project version No: ATHER_EVSE_V1.0");// 
+  log_i("Project Author    : Krishna R Nair");// 
+  log_i("Project Name      : ATHER EVSE\n");//   
   
   // init_EspDetails();
 
-  log_i("Check for FOTA Update, Press Switch.....");
+  log_i("Check for FOTA Update, Press Switch.....(Pull Low.....)");
   log_i("Initializing.");
   
   // for(int i1=0; i1<25; i1++)
@@ -53,12 +54,8 @@ void setup()
   //   delay(200);
   // }  
   
-  // pinMode(OUT_RLY_PIN  , OUTPUT);
-  // digitalWrite(OUT_RLY_PIN, HIGH);    // LOW = OFF, HIGH = ON  
-  // delay(3000);
-  // digitalWrite(OUT_RLY_PIN, LOW);    // LOW = OFF, HIGH = ON
-  // delay(3000);
-
+ 
+ 
 
   initCreateTask();
   
@@ -70,6 +67,7 @@ void setup()
   log_i("Setup Completed");
 }
 
+// const uint8_t Buf[] = "Aarav";
 void loop()
 {  
 
@@ -79,6 +77,8 @@ void loop()
     digitalWrite(OUT_RLY_PIN, LOW);    // Turn Off Output Relay
     delay(3000);
   #endif
+
+ 
 
   delay(100);    
 }

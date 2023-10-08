@@ -21,6 +21,8 @@ extern float Voltage;
 extern float Current;
 extern float Frequency;
 
+extern boolean newData;
+
 
 
 enum  // gNeoPixelState = NeoPixel States................

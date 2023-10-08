@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "GlobalHeader.h"
 
-#define OUT_RLY_PIN 21
+#define OUT_RLY_PIN     21
 #define OUT_RELAY_ON    digitalWrite(OUT_RLY_PIN, HIGH)   // LOW = OFF, HIGH = ON  
 #define OUT_RELAY_OFF   digitalWrite(OUT_RLY_PIN, LOW)    // LOW = OFF, HIGH = ON  
 
@@ -25,6 +25,12 @@ float Frequency;
   #define _OTA_H_
   #include "OTA.h"
 #endif
+
+#ifndef __BL_CLASSIC_CPP
+    #define __BL_CLASSIC_CPP
+    #include "BL_Classic.h"
+#endif
+
 
 #include "NeoPixelAPI.h"
 #include "RFID_API.h"
@@ -328,6 +334,47 @@ void TaskBuzzer( void * pvParameters )
 }
 /*********************BUZZER TASK & FUNCTIONS ENDS HERE***************/
 
+/*********************Bluetooth TASK & FUNCTIONS STARTS HERE*************/
+void initBluetooth(void)
+{
+   init_BluetoothClassic();
+  log_i("|----------------Bluetooth Communication Initialized--------------|");
+  
+} 
+
+#define STACKSIZE_BL_TASK 5000 // BYTES
+TaskProfilers ProfilerBluetooth;
+TaskHandle_t HandleBluetooth;
+void TaskBluetooth( void * pvParameters )
+{
+    initBluetooth(); 
+    while(1)
+    {
+      #if 0 // it prints a lot of messages..................... better to disable this here......
+      ProfilerBluetooth++;
+      if(ProfilerBluetooth > 600000)
+      {
+        ProfilerBluetooth = 0;
+        log_i("TaskBluetooth  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_BUZZER_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));  
+        log_v("BLUETOOTH____TASK____RUNNING______________!");
+      }
+      #endif
+      
+       // BL_TEST();
+      
+        recvWithStartEndMarkers();       
+      
+      if (newData == true) 
+      { 
+        parseBluetoothData();     
+      }
+      
+    }
+}
+/*********************BUZZER TASK & FUNCTIONS ENDS HERE***************/
+
+
+
 /*********************MAIN STATE TASK & FUNCTIONS STARTS HERE*************/
 void initMainState(void)
 {
@@ -454,6 +501,17 @@ void initCreateTask(void)
                     3,                      /* 3priority of the task */
                     &HandleBuzzer,        /* Task handle to keep track of created task, always pass address of handle*/
                     1);                     /* pin task to core 0 */
+  
+  xTaskCreatePinnedToCore(
+                    TaskBluetooth,           /* Task function. */
+                    "BluetoothTask",         /* name of task. */
+                    STACKSIZE_BL_TASK,/* Stack size of task in bytes*/
+                    NULL,                   /* parameter of the task */
+                    3,                      /* 3priority of the task */
+                    &HandleBluetooth,        /* Task handle to keep track of created task, always pass address of handle*/
+                    1);                     /* pin task to core 0 */
+
+
 
   
 
@@ -637,8 +695,7 @@ void funcMainStateMachine(void)
           gi8_MSTATE      = MSTATE_WAIT;       
           gi8_RFID_STATUS = RFID_STATUS_UNKNOWN;
           gi6_WaitDelay   = 1100;
-          OUT_RELAY_OFF;          
-          
+          OUT_RELAY_OFF;             
 
         }
 
