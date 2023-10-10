@@ -23,6 +23,8 @@ extern float Frequency;
 
 extern boolean newData;
 
+extern unsigned int HoldingBuff[];
+
 
 
 enum  // gNeoPixelState = NeoPixel States................

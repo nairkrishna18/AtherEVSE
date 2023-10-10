@@ -348,12 +348,26 @@ TaskHandle_t HandleBluetooth;
 void TaskBluetooth( void * pvParameters )
 {
     initBluetooth(); 
+    HoldingBuff[0] = 1234;
+    HoldingBuff[1] = 0;
+
     while(1)
     {
-      #if 0 // it prints a lot of messages..................... better to disable this here......
+      #if 1 // it prints a lot of messages..................... better to disable this here......
       ProfilerBluetooth++;
       if(ProfilerBluetooth > 600000)
       {
+        HoldingBuff[0]++; // Voltage
+        HoldingBuff[1]++; // Current
+        HoldingBuff[2]++; // Energy
+        HoldingBuff[3]++; // Frequency
+        HoldingBuff[4] = 1; // Charge State
+        HoldingBuff[5] = 2; // Error State
+
+
+        log_i("HoldingBuff[0]=%d",HoldingBuff[0]);
+        log_i("HoldingBuff[1]=%d",HoldingBuff[1]);
+
         ProfilerBluetooth = 0;
         log_i("TaskBluetooth  =  Used %d Bytes & Free %d Bytes ",(STACKSIZE_BUZZER_TASK-uxTaskGetStackHighWaterMark(NULL)), uxTaskGetStackHighWaterMark(NULL));  
         log_v("BLUETOOTH____TASK____RUNNING______________!");
@@ -362,8 +376,10 @@ void TaskBluetooth( void * pvParameters )
       
        // BL_TEST();
       
-        recvWithStartEndMarkers();       
+      recvWithStartEndMarkers();       
       
+      
+
       if (newData == true) 
       { 
         parseBluetoothData();     
